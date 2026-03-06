@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CreYo - Stop Studying. Start Creating.</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #001F3F;
+            --yellow: #FFD700;
+            --bg-gray: #f4f7f6;
+            --sidebar-blue: #b4c5d6;
+            --nav-inactive: #8e8e93;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        
+        /* Added padding-bottom so content isn't hidden by the nav bar */
+        body { background-color: var(--bg-gray); color: #333; padding-bottom: 80px; }
+
+        /* Navigation Bar */
+        header { background: white; padding: 10px; text-align: center; border-bottom: 1px solid #ddd; position: sticky; top: 0; z-index: 1000; }
+        .logo { height: 75px; cursor: pointer; }
+
+        .page { display: none; min-height: calc(100vh - 56px); }
+        .active-page { display: block; }
+
+        /* --- BOTTOM NAVIGATION BAR --- */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid #ddd;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            z-index: 2000;
+        }
+
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            color: var(--nav-inactive);
+            font-size: 0.7rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .nav-item.active {
+            color: var(--navy);
+        }
+
+        .nav-icon {
+            font-size: 1.5rem;
+            margin-bottom: 2px;
+        }
+
+        /* --- PAGE 1: LANDING PAGE --- */
+        .hero { text-align: center; padding: 30px 20px; }
+        .hero h1 { font-size: 2.2rem; font-weight: 900; line-height: 1.1; }
+        .landing-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding: 20px; }
+        .landing-card { width: 280px; border-radius: 20px; overflow: hidden; background: white; box-shadow: 0 10px 25px rgba(0,0,0,0.1); transition: transform 0.3s; }
+        .landing-card:hover { transform: translateY(-5px); }
+        .card-img { width: 100%; height: 180px; background: #eee; object-fit: cover; }
+        .card-body { padding: 20px; text-align: center; }
+        .btn-select { background: var(--navy); color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; font-weight: 800; cursor: pointer; text-transform: uppercase; }
+        .btn-yellow { background: var(--yellow); color: var(--navy); }
+
+        /* --- PAGE 2: ROADMAP PAGE --- */
+        .roadmap-header { background: white; padding: 20px; border-bottom: 1px solid #eee; }
+        .progress-container { max-width: 600px; margin: 0 auto; }
+        .bar-outer { width: 100%; height: 12px; background: #e0e0e0; border-radius: 6px; margin: 10px 0; }
+        .bar-inner { width: 25%; height: 100%; background: var(--navy); border-radius: 6px; transition: width 0.8s; }
+        .roadmap-path { position: relative; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .trunk { position: absolute; left: 50%; top: 0; bottom: 0; width: 4px; background: var(--navy); transform: translateX(-50%); }
+        .milestone { display: flex; align-items: center; margin-bottom: 80px; position: relative; z-index: 2; cursor: pointer; }
+        .ms-side { width: 45%; padding: 0 20px; }
+        .ms-center { width: 10%; display: flex; justify-content: center; }
+        .node { width: 35px; height: 35px; background: var(--yellow); border: 4px solid var(--navy); border-radius: 50%; }
+        .locked-node { background: #bdc3c7; border-color: #7f8c8d; }
+        .ms-card { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); font-size: 0.85rem; }
+        .secret-sauce { border: 2.5px solid var(--navy); }
+
+        /* --- PAGE 3: INTERACTIVE LAB --- */
+        .workspace { display: flex; height: calc(100vh - 56px); }
+        .canvas-area { flex: 1.3; padding: 20px; background: #e9ecef; display: flex; flex-direction: column; gap: 20px; }
+        .main-canvas { flex: 1; background: white; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid #ccc; position: relative; }
+        .canvas-emoji { font-size: 8rem; transition: transform 0.3s; }
+        .ai-sidebar { flex: 0.7; background: var(--sidebar-blue); padding: 25px; display: flex; flex-direction: column; gap: 20px; border-left: 2px solid #99a; }
+        .chat-bubble { background: white; padding: 15px; border-radius: 12px; font-size: 0.9rem; line-height: 1.5; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .alt-row { display: flex; gap: 15px; margin-top: 10px; }
+        .alt-box { width: 60px; height: 60px; background: white; border-radius: 10px; border: 3px solid transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 2rem; }
+        .alt-active { border-color: var(--yellow); }
+        .btn-apply { background: var(--yellow); border: none; padding: 12px; border-radius: 25px; font-weight: 900; cursor: pointer; }
+
+        /* --- PAGE 4: PORTFOLIO --- */
+        .portfolio-page { padding: 40px 20px; max-width: 1000px; margin: 0 auto; }
+        .portfolio-header { background: var(--navy); color: white; padding: 30px; border-radius: 15px 15px 0 0; text-align: center; }
+        .portfolio-content { background: white; padding: 30px; border-radius: 0 0 15px 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        .user-profile { text-align: center; padding: 20px; border: 1px solid #eee; border-radius: 15px; }
+        .badge { display: flex; align-items: center; gap: 15px; margin-top: 15px; background: #f9f9f9; padding: 10px; border-radius: 10px; }
+        .live-project { background: #f0f7ff; padding: 20px; border-radius: 15px; border-left: 5px solid #2196F3; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <img src="creyologo3.jpeg" alt="CreYo" class="logo" onclick="showPage('landing')">
+    </header>
+
+    <nav class="bottom-nav">
+        <div class="nav-item active" id="nav-landing" onclick="showPage('landing')">
+            <span class="nav-icon">🏠</span>
+            Home
+        </div>
+        <div class="nav-item" id="nav-roadmap" onclick="showPage('roadmap')">
+            <span class="nav-icon">🗺️</span>
+            Roadmap
+        </div>
+        <div class="nav-item" id="nav-lab" onclick="showPage('lab')">
+            <span class="nav-icon">⚙️</span>
+            AI Tutor
+        </div>
+        <div class="nav-item" id="nav-portfolio" onclick="showPage('portfolio')">
+            <span class="nav-icon">👤</span>
+            Profile
+        </div>
+    </nav>
+
+    <div id="landing" class="page active-page">
+        <div class="hero">
+            <h1>Stop Studying.<br>Start Creating.</h1>
+            <p>Build a real portfolio with AI-guided projects. Your career starts now.</p>
+        </div>
+        <div class="landing-container">
+            <div class="landing-card">
+                <img src="333.jpeg" class="card-img">
+                <div class="card-body">
+                    <h3>UI/UX DESIGN</h3>
+                    <button class="btn-select" onclick="showPage('roadmap')">Select</button>
+                </div>
+            </div>
+            <div class="landing-card" style="background: #000; color: white;">
+                <img src="222.jpeg" class="card-img">
+                <div class="card-body">
+                    <h3>AI CREATIVE ARTIST</h3>
+                    <button class="btn-select btn-yellow" onclick="showPage('roadmap')">Select</button>
+                </div>
+            </div>
+            <div class="landing-card">
+                <img src="111.jpeg" class="card-img">
+                <div class="card-body">
+                    <h3>GAME DEVELOPMENT</h3>
+                    <button class="btn-select btn-yellow" onclick="showPage('roadmap')">Select</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="roadmap" class="page">
+        <div class="roadmap-header">
+            <div class="progress-container">
+                <div style="display:flex; justify-content:space-between; font-weight:800; font-size:0.8rem;">
+                    <span>Week 1 - Day 3</span>
+                    <span id="prog-text">25%</span>
+                </div>
+                <div class="bar-outer"><div class="bar-inner" id="prog-bar"></div></div>
+                <p style="text-align:center; font-size:0.7rem; font-weight:900; color:#666;">PROJECT PROGRESS BAR</p>
+            </div>
+        </div>
+        <div class="roadmap-path">
+            <div class="trunk"></div>
+            <div class="milestone">
+                <div class="ms-side">
+                    <h4>MILESTONE 1</h4>
+                    <h3>Foundations of User Empathy</h3>
+                    <p style="color:green; font-weight:bold; font-size:0.7rem;">🔓 Unlocked</p>
+                </div>
+                <div class="ms-center"><div class="node"></div></div>
+                <div class="ms-side"><div class="ms-card">Project 1: Empathy Map for food app.</div></div>
+            </div>
+            <div class="milestone" onclick="showPage('lab')">
+                <div class="ms-side">
+                    <h4>MILESTONE 3 (LOCKED)</h4>
+                    <h3>Prototyping & AI Feedback</h3>
+                </div>
+                <div class="ms-center"><div class="node locked-node" style="background:var(--yellow);"></div></div>
+                <div class="ms-side">
+                    <div class="ms-card secret-sauce">
+                        <b style="color:var(--navy);">THE "SECRET SAUCE" HIGHLIGHT:</b><br>
+                        Real-time AI Feedback on wireframes. Click to enter Lab!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="lab" class="page">
+        <div class="workspace">
+            <div class="canvas-area">
+                <h2 style="font-weight:900;">MILESTONE 3: Prototyping</h2>
+                <div class="main-canvas">
+                    <div id="canvas-emoji" class="canvas-emoji">🌏</div>
+                    <p style="margin-top:20px; font-weight:800;">Sustainable Earth Food App</p>
+                </div>
+                <div style="display:flex; gap:15px;">
+                    <div class="ms-card" style="flex:1;"><b>Asset:</b> Wireframe V1.2</div>
+                    <button class="btn-select" style="flex:1;" onclick="showPage('portfolio')">Finish & Validate Portfolio →</button>
+                </div>
+            </div>
+            <div class="ai-sidebar">
+                <div style="font-weight:900; display:flex; align-items:center; gap:10px;">
+                    <span style="background:var(--navy); color:var(--yellow); padding:5px; border-radius:50%;">🔒</span>
+                    CREYO AI MENTOR
+                </div>
+                <div class="chat-bubble">Industry standard is typically 2-3 colors. Your logo uses 12. Try these alternatives:</div>
+                <div class="alt-row">
+                    <div class="alt-box alt-active" onclick="setEmoji(this, '🌏')">🌏</div>
+                    <div class="alt-box" onclick="setEmoji(this, '🌱')">🌱</div>
+                </div>
+                <button class="btn-apply" onclick="applyVariation()">Apply Variation 2</button>
+                <div class="chat-bubble" style="margin-top:auto; font-size:0.75rem; color:#666;">Chat with AI Mentor...</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="portfolio" class="page">
+        <div class="portfolio-page">
+            <div class="portfolio-header">
+                <h1>Creator Portfolio: Rohan Sharma</h1>
+            </div>
+            <div class="portfolio-content">
+                <div class="left-col">
+                    <div class="user-profile">
+                        <img src="444.jpeg" style="border-radius:50%;" height="75px">
+                        <h2>Rohan Sharma</h2>
+                        <span style="background:#ddd; padding:4px 10px; border-radius:20px; font-size:0.7rem;">CREYO-VALIDATED</span>
+                        <p style="margin-top:10px; font-size:0.8rem;">Validated: 21 Nov 2025</p>
+                    </div>
+                    <div class="badge">
+                        <span style="font-size:2rem;">🏅</span>
+                        <div><b>Sustainable Branding</b><br>Fashion Label Brand Identity</div>
+                    </div>
+                </div>
+                <div class="right-col">
+                    <div class="live-project">
+                        <h3>Project 1: "Sustainable Earth"</h3>
+                        <p style="font-size:0.8rem; margin:10px 0;">Portfolio complete: Validated 21 Nov 2025.</p>
+                        <div style="display:flex; gap:10px; align-items:center;">
+                            <span style="font-size:2rem;">🌏</span>
+                            <div style="width:20px; height:20px; border-radius:50%; background:green;"></div>
+                            <div style="width:20px; height:20px; border-radius:50%; background:skyblue;"></div>
+                        </div>
+                        <p style="margin-top:15px; font-weight:bold; color:#2196F3;">Result: 15 successful client leads.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedEmoji = '🌏';
+
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+            
+            // Show requested page
+            const targetPage = document.getElementById(pageId);
+            targetPage.classList.add('active-page');
+            
+            // Update Navigation UI
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.getElementById('nav-' + pageId).classList.add('active');
+
+            window.scrollTo(0,0);
+            
+            // Lab specific progress update
+            if(pageId === 'lab') {
+                document.getElementById('prog-bar').style.width = '75%';
+                document.getElementById('prog-text').innerText = '75%';
+            }
+        }
+
+        function setEmoji(el, emoji) {
+            document.querySelectorAll('.alt-box').forEach(b => b.classList.remove('alt-active'));
+            el.classList.add('alt-active');
+            selectedEmoji = emoji;
+        }
+
+        function applyVariation() {
+            const canvas = document.getElementById('canvas-emoji');
+            canvas.style.transform = 'scale(0.5)';
+            setTimeout(() => {
+                canvas.innerText = selectedEmoji;
+                canvas.style.transform = 'scale(1)';
+            }, 300);
+        }
+    </script>
+</body>
+</html>
